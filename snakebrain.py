@@ -58,21 +58,62 @@ class NeuralNet:
         #TODO
         return None
 
+    def __calc_node_color(self, value):
+        """Helper function to calculate the hexvalue of a node color
+        from it's activation value. Applied sigmoid to the activation
+        for easy translation into a gradient."""
+
+        # Use sigmoid to be on 0-1 scale
+        sig_val = sigmoid(value)
+
+        # Convert to rgb values
+        red = int(255 - 255 * sig_val)
+        green = int(255 - (255-red)/2)
+        blue = red
+
+        # Convert rgb to hex
+        return('#%02x%02x%02x' % (red, green, blue))
+
     def draw(self, canvas):
         """Draws a graph like representation of the current state of
         the neural network to the given tkinter canvas.  The gradient 
         represents the weights of the edges."""
 
         #HARDCODED VALUES RN TODO
+        nodesize = 20
+        node_vert_space = 10
+        layerspace = 25
+
+        # Calculate the offset needed to align the middle of each 
+        # node layer
+        # First get the longest layer index
+        longest_layer = 0
+        for i, _ in enumerate(self.nodes):
+            if len(self.nodes[i]) > len(self.nodes[longest_layer]):
+                longest_layer = i
+        
+        longest_length = len(self.nodes[longest_layer])
+        longest_height = longest_length*(nodesize+node_vert_space)
+        longest_height -= node_vert_space
 
         # First draw the nodes
         for i, _ in enumerate(self.nodes):
+            length = len(self.nodes[i])
+            height = length*(nodesize+node_vert_space)
+            height -= node_vert_space
+
+            diff = longest_height - height
+            vert_offset = diff/2
+
+            # TODO Keep track of drawn positions to make
+            # drawing the edges easier
             for j, _ in enumerate(self.nodes[i]):
-                x0 = i*20 + i*25
-                y0 = j*20 + j*10
-                x1 = x0 + 20
-                y1 = y0 + 20
-                canvas.create_oval(x0, y0, x1, y1, fill="green")
+                x0 = i*(nodesize + layerspace)
+                y0 = j*(nodesize + node_vert_space) + vert_offset
+                x1 = x0 + nodesize
+                y1 = y0 + nodesize
+                fill = self.__calc_node_color(self.nodes[i][j])
+                canvas.create_oval(x0, y0, x1, y1, fill=fill)
 
 if __name__ == "__main__":
     skynet = NeuralNet(5, 3, relu)
@@ -82,7 +123,7 @@ if __name__ == "__main__":
 
     # Import the require libs
     from tkinter import *
-    
+
     # Make the window
     win=Tk()
 

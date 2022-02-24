@@ -4,7 +4,7 @@ networks.
 Author: Tyler Weir
 Date: Feb 23, 2022
 """
-import numpy
+import numpy as np
 
 def sigmoid(arg):
     """The sigmoid activation function returns the value of the 
