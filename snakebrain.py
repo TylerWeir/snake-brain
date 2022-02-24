@@ -80,9 +80,9 @@ class NeuralNet:
         represents the weights of the edges."""
 
         #HARDCODED VALUES RN TODO
-        nodesize = 20
+        nodesize = 40 
         node_vert_space = 10
-        layerspace = 25
+        layerspace = 60 
 
         # Calculate the offset needed to align the middle of each 
         # node layer
@@ -96,6 +96,10 @@ class NeuralNet:
         longest_height = longest_length*(nodesize+node_vert_space)
         longest_height -= node_vert_space
 
+        # Store the node positions for reference when drawing the
+        # edges.
+        node_positions = []
+
         # First draw the nodes
         for i, _ in enumerate(self.nodes):
             length = len(self.nodes[i])
@@ -105,8 +109,8 @@ class NeuralNet:
             diff = longest_height - height
             vert_offset = diff/2
 
-            # TODO Keep track of drawn positions to make
-            # drawing the edges easier
+            node_positions.append(self.nodes[i].tolist())
+
             for j, _ in enumerate(self.nodes[i]):
                 x0 = i*(nodesize + layerspace)
                 y0 = j*(nodesize + node_vert_space) + vert_offset
@@ -114,12 +118,24 @@ class NeuralNet:
                 y1 = y0 + nodesize
                 fill = self.__calc_node_color(self.nodes[i][j])
                 canvas.create_oval(x0, y0, x1, y1, fill=fill)
+                node_positions[i][j] = (x0+nodesize/2, y0+nodesize/2)
+
+        # Then draw the connections
+        for i, _ in enumerate(self.weights): #weight layer
+            for j, _ in enumerate(node_positions[i]): #node input
+                x0 = node_positions[i][j][0] + nodesize/2
+                y0 = node_positions[i][j][1]
+
+                for k, _ in enumerate(node_positions[i+1]):
+                    x1 = node_positions[i+1][k][0] - nodesize/2
+                    y1 = node_positions[i+1][k][1]
+                    canvas.create_line(x0, y0, x1, y1)
+
 
 if __name__ == "__main__":
     skynet = NeuralNet(5, 3, relu)
     skynet.add_hidden_layer(6, relu)
     skynet.add_hidden_layer(4, relu)
-    print(skynet.weights)
 
     # Import the require libs
     from tkinter import *
