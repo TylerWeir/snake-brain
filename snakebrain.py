@@ -41,20 +41,44 @@ class NeuralNet:
         self.weights.pop()
 
         # Weights into the hidden layer
-        into_layer = len(self.nodes[-2])
-        self.weights.append(np.random.rand(into_layer, size))
+        into_layer = len(self.nodes[-3])
+        self.weights.append(np.random.rand(size, into_layer))
 
         # Weights out of the hidden layer
-        self.weights.append(np.random.rand(size, self.output_size))
+        self.weights.append(np.random.rand(self.output_size, size))
 
     def evaluate(self, data):
-        """Passes `data` into the input layer of the net and returns 
-        the activations of the output layer."""
-        #TODO
-        return None
+        """Passes `data` into the input layer of the net and returns
+        the activations of the output layer.
+
+        data -- should be a flattened representation of the sample.
+        """
+        #TODO NO biasing yet
+
+        # Apply the data values to the input layer 
+        for i, _ in enumerate(data):
+            self.nodes[0][i] = data[i]
+
+        # Work layer by layer appling weights and calculating 
+        # activation
+        for i in range(1, len(self.nodes)):
+            raw_acts = np.dot(self.weights[i-1], self.nodes[i-1])
+            
+            # Then apply the activation function to each element
+            act_f = self.activations[i]
+            actual_acts = [act_f(x) for x in raw_acts]
+            
+            # copy into the net
+            for j, _ in enumerate(actual_acts):
+                self.nodes[i][j] = actual_acts[j]
+
+        # Return the activations of the output layer
+        return self.nodes[-1][:]
+
+
 
     def train(self, num_epochs, learning_rate):
-        """Trains the net for `num_epochs` at `learning_rate`."""
+        """Trains the net for `num_epochs` at `learning_rate`"""
         #TODO
         return None
 
@@ -136,6 +160,9 @@ if __name__ == "__main__":
     skynet = NeuralNet(5, 3, relu)
     skynet.add_hidden_layer(6, relu)
     skynet.add_hidden_layer(4, relu)
+
+    result = skynet.evaluate([0, 0, 0, 0, 0])
+    print(result)
 
     # Import the require libs
     from tkinter import *
